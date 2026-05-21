@@ -1,0 +1,371 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.db{font-family:var(--font-sans);padding:1.5rem 0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.brand{font-size:15px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:8px}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:#378ADD}
+.topright{display:flex;align-items:center;gap:10px}
+.week-pill{font-size:12px;padding:5px 11px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:5px}
+.nav{display:flex;background:var(--color-background-secondary);border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);padding:3px;gap:2px}
+.ntab{padding:5px 12px;border-radius:6px;border:none;background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:all .15s;font-family:var(--font-sans)}
+.ntab.on{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border:0.5px solid var(--color-border-tertiary)}
+
+.board-frame{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)}
+.full-board{display:grid;grid-template-columns:52px repeat(4,minmax(0,1fr))}
+
+.corner{background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary)}
+.col-header{padding:14px 14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-left:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;border:0.5px solid transparent}
+.col-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.col-count{margin-left:auto;font-size:11px;padding:2px 7px;border-radius:99px;background:var(--color-background-secondary);color:var(--color-text-tertiary);border:0.5px solid var(--color-border-tertiary)}
+
+.row-label{display:flex;align-items:center;justify-content:center;padding:8px 0;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;border-right:0.5px solid var(--color-border-tertiary);border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.row-label.rl-backlog{}
+.row-label.rl-inprog{color:#185FA5}
+.row-label.rl-done{color:#27500A}
+
+.cell{border-left:0.5px solid var(--color-border-tertiary);border-top:0.5px solid var(--color-border-tertiary);padding:12px;background:var(--color-background-secondary);min-height:140px}
+.cell.inprog-row{background:var(--color-background-primary)}
+.cell.done-row{background:#f8fdf8}
+.cell-inner{display:flex;flex-direction:column;gap:8px}
+
+.topic-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;transition:border-color .15s}
+.topic-card:hover{border-color:var(--color-border-secondary)}
+.tc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:5px}
+.tc-title{font-size:12px;font-weight:500;color:var(--color-text-primary);line-height:1.4;flex:1}
+.tc-del{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:13px;padding:2px;border-radius:4px;flex-shrink:0;line-height:1;opacity:0}
+.topic-card:hover .tc-del{opacity:1}
+.tc-del:hover{color:#E24B4A;background:var(--color-background-secondary)}
+
+.tc-meta{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px}
+.meta-chip{font-size:10px;padding:2px 7px;border-radius:99px;display:flex;align-items:center;gap:3px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+.meta-chip.overdue{background:#FCEBEB;color:#A32D2D;border-color:#F7C1C1}
+.meta-chip.soon{background:#FAEEDA;color:#633806;border-color:#FAC775}
+
+.st-prog-wrap{margin-bottom:7px}
+.st-prog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.st-prog-lbl{font-size:10px;color:var(--color-text-tertiary)}
+.st-prog{height:3px;background:var(--color-border-tertiary);border-radius:99px;overflow:hidden}
+.st-progbar{height:100%;border-radius:99px;transition:width .3s}
+
+.subtasks{margin-bottom:7px;display:flex;flex-direction:column;gap:2px}
+.st-row{display:flex;align-items:center;gap:6px;padding:2px 4px;border-radius:4px}
+.st-row:hover{background:var(--color-background-secondary)}
+.st-cb{width:13px;height:13px;accent-color:#378ADD;flex-shrink:0;cursor:pointer}
+.st-lbl{font-size:11px;color:var(--color-text-secondary);flex:1;line-height:1.3}
+.st-lbl.done{text-decoration:line-through;color:var(--color-text-tertiary)}
+.st-x{background:none;border:none;cursor:pointer;color:transparent;font-size:11px;padding:0;line-height:1}
+.st-row:hover .st-x{color:var(--color-text-tertiary)}
+.st-x:hover{color:#E24B4A}
+
+.st-add-row{display:flex;gap:5px;margin-bottom:6px}
+.st-inp{flex:1;font-size:11px;padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans)}
+.st-inp:focus{outline:none;border-color:#378ADD;background:var(--color-background-primary)}
+.st-add-go{padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:11px;color:var(--color-text-secondary);font-family:var(--font-sans);white-space:nowrap}
+.st-add-go:hover{background:var(--color-background-secondary)}
+
+.mv-select{width:100%;font-size:11px;padding:4px 7px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-tertiary);cursor:pointer;font-family:var(--font-sans)}
+.mv-select:focus{outline:none}
+
+.add-topic-btn{width:100%;padding:6px 10px;border-radius:var(--border-radius-md);border:0.5px dashed var(--color-border-tertiary);background:transparent;color:var(--color-text-tertiary);font-size:12px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:5px;font-family:var(--font-sans);transition:all .15s}
+.add-topic-btn:hover{border-color:var(--color-border-secondary);color:var(--color-text-secondary);background:var(--color-background-primary)}
+
+.form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:12px}
+.form-lbl{font-size:10px;color:var(--color-text-secondary);margin-bottom:4px;font-weight:500;letter-spacing:.03em}
+.form-inp{width:100%;font-size:12px;padding:6px 9px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-primary);margin-bottom:9px;font-family:var(--font-sans)}
+.form-inp:focus{outline:none;border-color:#378ADD;background:var(--color-background-primary)}
+.form-btns{display:flex;gap:6px}
+.fbtn{flex:1;padding:6px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);font-family:var(--font-sans)}
+.fbtn:hover{background:var(--color-background-secondary)}
+.fbtn.primary{background:#378ADD;color:#fff;border-color:#378ADD;font-weight:500}
+.fbtn.primary:hover{background:#185FA5}
+
+.ov-wrap{display:flex;flex-direction:column;gap:12px}
+.ov-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.ov-stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;border:0.5px solid var(--color-border-tertiary)}
+.ov-num{font-size:24px;font-weight:500;color:var(--color-text-primary)}
+.ov-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.ov-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.ov-card-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.member-ov-row{display:grid;grid-template-columns:100px 1fr 70px 34px;align-items:center;gap:12px;padding:9px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.member-ov-row:last-child{border-bottom:none}
+.pbar-wrap{height:4px;background:var(--color-background-secondary);border-radius:99px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.pbar{height:100%;border-radius:99px;transition:width .3s}
+</style>
+
+<div class="db">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      MotoSpex AI
+    </div>
+    <div class="topright">
+      <div class="week-pill">
+        <i class="ti ti-calendar" aria-hidden="true" style="font-size:12px"></i>
+        <span id="weekPill"></span>
+      </div>
+      <div class="nav">
+        <button class="ntab on" onclick="showView('board',this)">
+          <i class="ti ti-layout-kanban" aria-hidden="true" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>Board
+        </button>
+        <button class="ntab" onclick="showView('overview',this)">
+          <i class="ti ti-chart-bar" aria-hidden="true" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>Overview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-board">
+    <div class="board-frame">
+      <div class="full-board" id="fullBoard"></div>
+    </div>
+  </div>
+
+  <div id="view-overview" style="display:none">
+    <div class="ov-wrap">
+      <div class="ov-stats" id="ovStats"></div>
+      <div class="ov-card">
+        <div class="ov-card-title"><i class="ti ti-users" aria-hidden="true" style="font-size:13px"></i>Progress by member</div>
+        <div id="ovRows"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MEMBERS=[
+  {id:'karan',name:'Karan',initials:'KA',bg:'#E6F1FB',fg:'#0C447C',bar:'#378ADD'},
+  {id:'sagarika',name:'Sagarika',initials:'SA',bg:'#E1F5EE',fg:'#085041',bar:'#1D9E75'},
+  {id:'jatin',name:'Jatin',initials:'JA',bg:'#FAEEDA',fg:'#633806',bar:'#EF9F27'},
+  {id:'felix',name:'Felix',initials:'FE',bg:'#EEEDFE',fg:'#3C3489',bar:'#7F77DD'},
+];
+const ROWS=[
+  {id:'backlog',label:'Backlog',cls:'rl-backlog',cellCls:''},
+  {id:'inprogress',label:'In progress',cls:'rl-inprog',cellCls:'inprog-row'},
+  {id:'done',label:'Done',cls:'rl-done',cellCls:'done-row'},
+];
+const SK='msx_v5';
+let state={};
+let addingIn={};
+
+function getWeekNum(d){const j=new Date(d.getFullYear(),0,4);return Math.ceil(((d-j)/86400000+j.getDay()+1)/7);}
+function fmtShort(ts){if(!ts)return '';return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}
+function daysAgo(ts){if(!ts)return 0;return Math.floor((Date.now()-ts)/86400000);}
+function daysUntil(s){if(!s)return null;return Math.ceil((new Date(s).getTime()-Date.now())/86400000);}
+
+function load(){
+  try{const r=localStorage.getItem(SK);if(r)state=JSON.parse(r);}catch(e){}
+  MEMBERS.forEach(m=>{if(!state[m.id])state[m.id]={topics:[]};});
+}
+function save(){try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}}
+function subtaskPct(topic){
+  if(!topic.subtasks||!topic.subtasks.length)return null;
+  return Math.round(topic.subtasks.filter(s=>s.done).length/topic.subtasks.length*100);
+}
+
+function renderWeek(){
+  const now=new Date();
+  document.getElementById('weekPill').textContent='CW '+getWeekNum(now)+' · '+now.getFullYear();
+}
+
+function addSTfromBtn(mid,tid){
+  const inp=document.getElementById('st-inp-'+mid+'-'+tid);
+  if(!inp)return;
+  const text=inp.value.trim();
+  if(!text)return;
+  const t=state[mid].topics.find(t=>t.id===tid);
+  if(t)t.subtasks.push({id:Date.now(),text,done:false});
+  save();renderTopicInPlace(mid,tid);renderOverview();
+}
+function toggleST(mid,tid,sid){
+  const t=state[mid].topics.find(t=>t.id===tid);
+  if(t){const s=t.subtasks.find(s=>s.id===sid);if(s)s.done=!s.done;}
+  save();renderTopicInPlace(mid,tid);renderOverview();
+}
+function delST(mid,tid,sid){
+  const t=state[mid].topics.find(t=>t.id===tid);
+  if(t)t.subtasks=t.subtasks.filter(s=>s.id!==sid);
+  save();renderTopicInPlace(mid,tid);renderOverview();
+}
+function delTopic(mid,tid){
+  state[mid].topics=state[mid].topics.filter(t=>t.id!==tid);
+  save();renderBoard();renderOverview();
+}
+function moveTopic(mid,tid,newCol){
+  if(!newCol)return;
+  const t=state[mid].topics.find(t=>t.id===tid);
+  if(t)t.col=newCol;
+  save();renderBoard();renderOverview();
+}
+
+function topicCardHTML(mid,tid){
+  const m=MEMBERS.find(x=>x.id===mid);
+  const topic=state[mid].topics.find(t=>t.id===tid);
+  if(!topic)return '';
+  const age=daysAgo(topic.addedAt);
+  const du=daysUntil(topic.targetDate);
+  const pct=subtaskPct(topic);
+  const otherRows=ROWS.filter(r=>r.id!==topic.col);
+  const doneCount=topic.subtasks?topic.subtasks.filter(s=>s.done).length:0;
+  const totalCount=topic.subtasks?topic.subtasks.length:0;
+
+  let duChip='';
+  if(topic.targetDate){
+    const ov=du!==null&&du<0;
+    const soon=du!==null&&du>=0&&du<=3;
+    const cls=ov?'overdue':soon?'soon':'';
+    const label=ov?Math.abs(du)+'d overdue':du===0?'due today':du+'d left';
+    duChip=`<span class="meta-chip ${cls}"><i class="ti ti-calendar-due" aria-hidden="true" style="font-size:10px"></i>${fmtShort(new Date(topic.targetDate).getTime())} · ${label}</span>`;
+  }
+
+  let h=`<div class="topic-card" id="tc-${mid}-${tid}">
+    <div class="tc-header">
+      <span class="tc-title">${topic.title}</span>
+      <button class="tc-del" onclick="delTopic('${mid}',${tid})" aria-label="Delete topic"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>
+    <div class="tc-meta">
+      <span class="meta-chip"><i class="ti ti-clock" aria-hidden="true" style="font-size:10px"></i>${fmtShort(topic.addedAt)} · ${age===0?'today':age+'d ago'}</span>
+      ${duChip}
+    </div>`;
+
+  if(pct!==null){
+    h+=`<div class="st-prog-wrap">
+      <div class="st-prog-head">
+        <span class="st-prog-lbl">Subtasks</span>
+        <span class="st-prog-lbl">${doneCount}/${totalCount}</span>
+      </div>
+      <div class="st-prog"><div class="st-progbar" style="background:${m.bar};width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  if(topic.subtasks&&topic.subtasks.length){
+    h+=`<div class="subtasks">`;
+    topic.subtasks.forEach(st=>{
+      h+=`<div class="st-row">
+        <input type="checkbox" class="st-cb" ${st.done?'checked':''} onchange="toggleST('${mid}',${tid},${st.id})" aria-label="Complete subtask">
+        <span class="st-lbl${st.done?' done':''}">${st.text}</span>
+        <button class="st-x" onclick="delST('${mid}',${tid},${st.id})" aria-label="Remove subtask"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
+  h+=`<div class="st-add-row">
+    <input class="st-inp" id="st-inp-${mid}-${tid}" placeholder="Add subtask…" onkeydown="if(event.key==='Enter'){event.preventDefault();addSTfromBtn('${mid}',${tid})}">
+    <button class="st-add-go" onclick="addSTfromBtn('${mid}',${tid})"><i class="ti ti-plus" aria-hidden="true" style="font-size:11px;vertical-align:-1px"></i> Add</button>
+  </div>`;
+
+  h+=`<select class="mv-select" onchange="moveTopic('${mid}',${tid},this.value)">
+    <option value="">Move to…</option>
+    ${otherRows.map(r=>`<option value="${r.id}">${r.label}</option>`).join('')}
+  </select></div>`;
+  return h;
+}
+
+function renderTopicInPlace(mid,tid){
+  const el=document.getElementById('tc-'+mid+'-'+tid);
+  if(!el){renderBoard();return;}
+  const inp=document.getElementById('st-inp-'+mid+'-'+tid);
+  const savedVal=inp?inp.value:'';
+  el.outerHTML=topicCardHTML(mid,tid);
+  const newInp=document.getElementById('st-inp-'+mid+'-'+tid);
+  if(newInp){newInp.value=savedVal;if(savedVal)newInp.focus();}
+}
+
+function startAdd(mid,rid){addingIn[mid+rid]=true;renderBoard();}
+function cancelAdd(mid,rid){delete addingIn[mid+rid];renderBoard();}
+function addTopic(mid,rid){
+  const key=mid+rid;
+  const titleEl=document.getElementById('fi-'+key);
+  const dateEl=document.getElementById('fd-'+key);
+  const title=(titleEl?titleEl.value:'').trim();
+  if(!title)return;
+  state[mid].topics.push({id:Date.now(),title,col:rid,addedAt:Date.now(),targetDate:dateEl?dateEl.value:'',subtasks:[]});
+  delete addingIn[key];
+  save();renderBoard();
+}
+
+function renderBoard(){
+  let h='';
+  h+=`<div class="corner"></div>`;
+  MEMBERS.forEach(mem=>{
+    const count=(state[mem.id].topics||[]).length;
+    h+=`<div class="col-header">
+      <div class="av" style="background:${mem.bg};color:${mem.fg}">${mem.initials}</div>
+      <span class="col-name">${mem.name}</span>
+      <span class="col-count">${count}</span>
+    </div>`;
+  });
+
+  ROWS.forEach(row=>{
+    h+=`<div class="row-label ${row.cls}">${row.label}</div>`;
+    MEMBERS.forEach(mem=>{
+      const topics=(state[mem.id].topics||[]).filter(t=>t.col===row.id);
+      const key=mem.id+row.id;
+      const isAdding=addingIn[key];
+      h+=`<div class="cell ${row.cellCls}"><div class="cell-inner">`;
+      if(isAdding){
+        h+=`<div class="form-card">
+          <div class="form-lbl">Topic title</div>
+          <input class="form-inp" id="fi-${key}" placeholder="e.g. API integration">
+          <div class="form-lbl">Target date</div>
+          <input class="form-inp" type="date" id="fd-${key}" style="margin-bottom:10px">
+          <div class="form-btns">
+            <button class="fbtn" onclick="cancelAdd('${mem.id}','${row.id}')">Cancel</button>
+            <button class="fbtn primary" onclick="addTopic('${mem.id}','${row.id}')">Add topic</button>
+          </div>
+        </div>`;
+      }
+      topics.forEach(topic=>{h+=topicCardHTML(mem.id,topic.id);});
+      h+=`<button class="add-topic-btn" onclick="startAdd('${mem.id}','${row.id}')"><i class="ti ti-plus" aria-hidden="true" style="font-size:13px"></i>Add topic</button>`;
+      h+=`</div></div>`;
+    });
+  });
+  document.getElementById('fullBoard').innerHTML=h;
+}
+
+function renderOverview(){
+  let totalTopics=0,totalDone=0,totalSTs=0,doneSTs=0;
+  MEMBERS.forEach(m=>{
+    (state[m.id].topics||[]).forEach(t=>{
+      totalTopics++;
+      if(t.col==='done')totalDone++;
+      (t.subtasks||[]).forEach(s=>{totalSTs++;if(s.done)doneSTs++;});
+    });
+  });
+  const teamPct=totalTopics?Math.round(totalDone/totalTopics*100):0;
+  document.getElementById('ovStats').innerHTML=`
+    <div class="ov-stat"><div class="ov-num">${totalTopics}</div><div class="ov-lbl">Total topics</div></div>
+    <div class="ov-stat"><div class="ov-num">${totalDone}</div><div class="ov-lbl">Completed</div></div>
+    <div class="ov-stat"><div class="ov-num">${teamPct}%</div><div class="ov-lbl">Done rate</div></div>
+    <div class="ov-stat"><div class="ov-num">${doneSTs}/${totalSTs}</div><div class="ov-lbl">Subtasks done</div></div>
+  `;
+  document.getElementById('ovRows').innerHTML=MEMBERS.map(m=>{
+    const topics=state[m.id].topics||[];
+    const done=topics.filter(t=>t.col==='done').length;
+    const inp=topics.filter(t=>t.col==='inprogress').length;
+    const bl=topics.filter(t=>t.col==='backlog').length;
+    const pct=topics.length?Math.round(done/topics.length*100):0;
+    return `<div class="member-ov-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="av" style="background:${m.bg};color:${m.fg};width:26px;height:26px;font-size:10px">${m.initials}</div>
+        <span style="font-size:13px;color:var(--color-text-primary)">${m.name}</span>
+      </div>
+      <div class="pbar-wrap"><div class="pbar" style="background:${m.bar};width:${pct}%"></div></div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);text-align:right">${bl}B · ${inp}P · ${done}D</div>
+      <div style="font-size:12px;font-weight:500;color:${m.bar};text-align:right">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function showView(v,btn){
+  document.getElementById('view-board').style.display=v==='board'?'':'none';
+  document.getElementById('view-overview').style.display=v==='overview'?'':'none';
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  if(v==='overview')renderOverview();
+}
+
+load();renderWeek();renderBoard();renderOverview();
+</script>
