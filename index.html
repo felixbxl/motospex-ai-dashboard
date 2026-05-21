@@ -1,0 +1,248 @@
+
+<h2 class="sr-only">MotoSpex AI team dashboard with sections for Karan, Sagarika, Jatin, and Felix — includes weekly updates, task tracker, and progress overview per member.</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.shell{padding:1.5rem 0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.logo{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.logo span{color:#378ADD}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-secondary);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary)}
+.tab.active{background:var(--color-background-primary);border-color:var(--color-border-primary);color:var(--color-text-primary);font-weight:500}
+.member-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.5rem}
+.member-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;position:relative}
+.member-card.focused{border-color:#378ADD;border-width:1.5px}
+.avatar-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.av-k{background:#E6F1FB;color:#0C447C}
+.av-s{background:#E1F5EE;color:#085041}
+.av-j{background:#FAEEDA;color:#633806}
+.av-f{background:#EEEDFE;color:#3C3489}
+.member-name{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.member-role{font-size:12px;color:var(--color-text-secondary)}
+.section-label{font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--color-text-tertiary);text-transform:uppercase;margin-bottom:6px}
+.update-box{width:100%;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;font-size:13px;color:var(--color-text-primary);background:var(--color-background-secondary);resize:none;line-height:1.5;min-height:70px;font-family:var(--font-sans)}
+.update-box:focus{outline:none;border-color:#378ADD}
+.tasks-area{margin-top:1rem}
+.task-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.task-row:last-child{border-bottom:none}
+.task-cb{width:16px;height:16px;accent-color:#378ADD;flex-shrink:0;cursor:pointer}
+.task-text{flex:1;font-size:13px;color:var(--color-text-primary)}
+.task-text.done{text-decoration:line-through;color:var(--color-text-tertiary)}
+.task-del{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);padding:0;display:flex;align-items:center;font-size:16px}
+.task-del:hover{color:var(--color-text-danger,#E24B4A)}
+.add-task{display:flex;gap:6px;margin-top:8px}
+.add-task input{flex:1;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:5px 9px;font-size:13px;background:var(--color-background-secondary);color:var(--color-text-primary)}
+.add-task input:focus{outline:none;border-color:#378ADD}
+.add-task button{padding:5px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-secondary)}
+.add-task button:hover{background:var(--color-background-secondary)}
+.prog-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.prog-bar-wrap{flex:1;height:6px;background:var(--color-background-secondary);border-radius:99px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.prog-bar{height:100%;border-radius:99px;background:#378ADD;transition:width .3s}
+.prog-pct{font-size:12px;font-weight:500;color:#378ADD;min-width:30px;text-align:right}
+.status-badge{font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:500}
+.st-doing{background:#E6F1FB;color:#0C447C}
+.st-done{background:#EAF3DE;color:#27500A}
+.st-blocked{background:#FCEBEB;color:#791F1F}
+.st-planned{background:#F1EFE8;color:#444441}
+.overview-section{margin-top:0.5rem}
+.ov-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:1rem;margin-bottom:1rem}
+.ov-stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem;text-align:center}
+.ov-num{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.ov-lbl{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.team-prog-row{display:grid;grid-template-columns:90px 1fr 36px;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.team-prog-row:last-child{border-bottom:none}
+.tp-name{font-size:13px;color:var(--color-text-primary)}
+.save-btn{margin-top:12px;width:100%;padding:7px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-secondary)}
+.save-btn:hover{background:var(--color-background-secondary)}
+.saved-toast{font-size:12px;color:#1D9E75;margin-top:4px;text-align:center;min-height:16px}
+</style>
+
+<div class="shell">
+  <div class="top-bar">
+    <div class="logo"><i class="ti ti-layout-dashboard" aria-hidden="true" style="font-size:18px;vertical-align:-2px;margin-right:6px"></i>Moto<span>Spex</span> AI</div>
+    <div class="tabs">
+      <button class="tab active" onclick="showView('members')"><i class="ti ti-users" aria-hidden="true" style="font-size:14px;vertical-align:-1px;margin-right:4px"></i>Team</button>
+      <button class="tab" onclick="showView('overview')"><i class="ti ti-chart-bar" aria-hidden="true" style="font-size:14px;vertical-align:-1px;margin-right:4px"></i>Overview</button>
+    </div>
+  </div>
+
+  <div id="view-members">
+    <div class="member-grid" id="memberGrid"></div>
+  </div>
+
+  <div id="view-overview" style="display:none">
+    <div class="ov-card">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px"><i class="ti ti-chart-bar" aria-hidden="true" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Team progress overview</div>
+      <div class="ov-grid" id="ovStats"></div>
+      <div class="section-label" style="margin-top:1rem;margin-bottom:8px">Progress by member</div>
+      <div id="ovTeamRows"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MEMBERS = [
+  {id:'karan',name:'Karan',initials:'KA',role:'Team member',av:'av-k'},
+  {id:'sagarika',name:'Sagarika',initials:'SA',role:'Team member',av:'av-s'},
+  {id:'jatin',name:'Jatin',initials:'JA',role:'Team member',av:'av-j'},
+  {id:'felix',name:'Felix',initials:'FE',role:'Team member',av:'av-f'},
+];
+
+const COLORS = {karan:'#378ADD',sagarika:'#1D9E75',jatin:'#EF9F27',felix:'#7F77DD'};
+
+let state = {};
+const SK = 'motospex_v1';
+
+function load(){
+  try{
+    const raw = localStorage.getItem(SK);
+    if(raw) state = JSON.parse(raw);
+  } catch(e){}
+  MEMBERS.forEach(m => {
+    if(!state[m.id]) state[m.id] = {update:'',tasks:[]};
+  });
+}
+
+function save(mid){
+  try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}
+  const t = document.getElementById('toast-'+mid);
+  if(t){t.textContent='Saved'; setTimeout(()=>t.textContent='',2000);}
+  renderOverview();
+}
+
+function getPct(mid){
+  const tasks = state[mid].tasks;
+  if(!tasks.length) return 0;
+  return Math.round((tasks.filter(t=>t.done).length/tasks.length)*100);
+}
+
+function addTask(mid){
+  const inp = document.getElementById('newtask-'+mid);
+  const val = inp.value.trim();
+  if(!val) return;
+  state[mid].tasks.push({id:Date.now(),text:val,done:false});
+  inp.value='';
+  renderMemberTasks(mid);
+  renderOverview();
+  save(mid);
+}
+
+function toggleTask(mid,tid){
+  const t = state[mid].tasks.find(t=>t.id===tid);
+  if(t) t.done=!t.done;
+  renderMemberTasks(mid);
+  renderOverview();
+  save(mid);
+}
+
+function delTask(mid,tid){
+  state[mid].tasks = state[mid].tasks.filter(t=>t.id!==tid);
+  renderMemberTasks(mid);
+  renderOverview();
+  save(mid);
+}
+
+function renderMemberTasks(mid){
+  const wrap = document.getElementById('tasks-'+mid);
+  const tasks = state[mid].tasks;
+  wrap.innerHTML = tasks.map(t=>`
+    <div class="task-row">
+      <input type="checkbox" class="task-cb" ${t.done?'checked':''} onchange="toggleTask('${mid}',${t.id})" aria-label="Mark task done">
+      <span class="task-text${t.done?' done':''}">${t.text}</span>
+      <button class="task-del" onclick="delTask('${mid}',${t.id})" aria-label="Delete task"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+  `).join('');
+  const pct = getPct(mid);
+  const bar = document.getElementById('prog-'+mid);
+  const pctEl = document.getElementById('pct-'+mid);
+  if(bar) bar.style.width=pct+'%';
+  if(pctEl) pctEl.textContent=pct+'%';
+}
+
+function renderMembers(){
+  const grid = document.getElementById('memberGrid');
+  grid.innerHTML = MEMBERS.map(m=>`
+    <div class="member-card" id="card-${m.id}">
+      <div class="avatar-row">
+        <div class="avatar ${m.av}">${m.initials}</div>
+        <div>
+          <div class="member-name">${m.name}</div>
+          <div class="member-role">${m.role}</div>
+        </div>
+      </div>
+
+      <div class="section-label">Weekly update</div>
+      <textarea class="update-box" id="upd-${m.id}" placeholder="What did you work on this week?" oninput="state['${m.id}'].update=this.value">${state[m.id].update||''}</textarea>
+
+      <div class="tasks-area">
+        <div class="section-label" style="margin-top:10px">Tasks</div>
+        <div id="tasks-${m.id}"></div>
+        <div class="add-task">
+          <input id="newtask-${m.id}" type="text" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask('${m.id}')">
+          <button onclick="addTask('${m.id}')"><i class="ti ti-plus" aria-hidden="true"></i></button>
+        </div>
+      </div>
+
+      <div class="prog-row">
+        <div class="section-label" style="margin:0">Progress</div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar" id="prog-${m.id}" style="background:${COLORS[m.id]};width:${getPct(m.id)}%"></div>
+        </div>
+        <div class="prog-pct" id="pct-${m.id}" style="color:${COLORS[m.id]}">${getPct(m.id)}%</div>
+      </div>
+
+      <button class="save-btn" onclick="save('${m.id}')"><i class="ti ti-device-floppy" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Save update</button>
+      <div class="saved-toast" id="toast-${m.id}"></div>
+    </div>
+  `).join('');
+  MEMBERS.forEach(m=>renderMemberTasks(m.id));
+}
+
+function renderOverview(){
+  const totalTasks = MEMBERS.reduce((a,m)=>a+state[m.id].tasks.length,0);
+  const doneTasks = MEMBERS.reduce((a,m)=>a+state[m.id].tasks.filter(t=>t.done).length,0);
+  const teamPct = totalTasks ? Math.round((doneTasks/totalTasks)*100) : 0;
+  const withUpdates = MEMBERS.filter(m=>state[m.id].update.trim()).length;
+
+  document.getElementById('ovStats').innerHTML = `
+    <div class="ov-stat"><div class="ov-num">${totalTasks}</div><div class="ov-lbl">Total tasks</div></div>
+    <div class="ov-stat"><div class="ov-num">${doneTasks}</div><div class="ov-lbl">Completed</div></div>
+    <div class="ov-stat"><div class="ov-num">${teamPct}%</div><div class="ov-lbl">Team progress</div></div>
+    <div class="ov-stat"><div class="ov-num">${withUpdates}/4</div><div class="ov-lbl">Updates posted</div></div>
+  `;
+
+  document.getElementById('ovTeamRows').innerHTML = MEMBERS.map(m=>{
+    const pct = getPct(m.id);
+    const cnt = state[m.id].tasks.length;
+    const done = state[m.id].tasks.filter(t=>t.done).length;
+    return `
+      <div class="team-prog-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar ${m.av}" style="width:28px;height:28px;font-size:11px">${m.initials}</div>
+          <span class="tp-name">${m.name}</span>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar" style="background:${COLORS[m.id]};width:${pct}%"></div>
+        </div>
+        <div style="font-size:12px;font-weight:500;color:${COLORS[m.id]};text-align:right">${done}/${cnt}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showView(v){
+  document.getElementById('view-members').style.display = v==='members'?'':'none';
+  document.getElementById('view-overview').style.display = v==='overview'?'':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(v==='members'&&i===0)||(v==='overview'&&i===1)));
+  if(v==='overview') renderOverview();
+}
+
+load();
+renderMembers();
+renderOverview();
+</script>
